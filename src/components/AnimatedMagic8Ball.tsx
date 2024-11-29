@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import SmokeEffect from './SmokeEffect';
 
 interface AnimatedMagic8BallProps {
@@ -8,8 +8,10 @@ interface AnimatedMagic8BallProps {
   isFirstQuestion: boolean;
 }
 
+const ROTATION_DURATION = 1.5;
+
 const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answer, isFirstQuestion }) => {
-  const [hasRotated, setHasRotated] = useState(false);
+  const [hasStartedFirstRotation, setHasStartedFirstRotation] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   // Calculate animation ranges based on screen size
@@ -17,88 +19,124 @@ const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answ
   const shakeRange = Math.max(15, Math.min(viewportHeight * 0.03, 40));
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.innerHeight);
-    };
+    const handleResize = () => setViewportHeight(window.innerHeight);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Initial state shows the "8" face
-  const floatAnimation = {
+  const handleRotationComplete = () => {
+    if (!hasStartedFirstRotation) {
+      setHasStartedFirstRotation(true);
+    }
+  };
+
+  // Only float animation, no rotation until first question
+  const initialAnimation = {
     y: [0, -floatRange, 0],
-    rotateX: hasRotated ? 180 : 0,
+    rotateY: 0,
     transition: {
       y: {
         duration: 2,
         repeat: Infinity,
         repeatType: "reverse" as const,
-        ease: [0.4, 0, 0.2, 1],
-      },
-      rotateX: {
-        duration: 1.2,
-        ease: "easeInOut",
-        delay: isFirstQuestion ? 0.5 : 0
+        ease: "easeInOut"
       }
     }
   };
 
+  // Float with rotation for first question
+  const rotationAnimation = {
+    y: [0, -floatRange, 0],
+    rotateY: 180,
+    transition: {
+      y: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse" as const,
+        ease: "easeInOut"
+      },
+      rotateY: {
+        duration: ROTATION_DURATION,
+        ease: "easeInOut",
+        delay: 0.2
+      }
+    }
+  };
+
+  // Shaking animation
   const shakeAnimation = {
     x: [-shakeRange, shakeRange, -shakeRange * 0.8, shakeRange * 0.8, -shakeRange * 0.5, shakeRange * 0.5, 0],
     y: [0, -shakeRange * 0.5, -shakeRange * 0.3, -shakeRange * 0.5, -shakeRange * 0.2, 0],
     rotate: [-5, 5, -4, 4, -2, 2, 0],
-    rotateX: 180,
+    rotateY: 180,
     transition: {
-      x: { duration: 0.8, ease: "easeInOut" },
-      y: { duration: 0.8, ease: "easeInOut" },
-      rotate: { duration: 0.8, ease: "easeInOut" },
-      rotateX: { duration: 0.5, ease: "easeInOut" }
+      duration: 0.8,
+      ease: "easeInOut",
     }
   };
 
-  useEffect(() => {
-    if (isFirstQuestion) {
-      setHasRotated(true);
-    }
-  }, [isFirstQuestion]);
+  // Determine which animation to use
+  const currentAnimation = isShaking ? shakeAnimation :
+                          isFirstQuestion && !hasStartedFirstRotation ? rotationAnimation :
+                          !hasStartedFirstRotation ? initialAnimation :
+                          {
+                            y: [0, -floatRange, 0],
+                            rotateY: 180,
+                            transition: {
+                              y: {
+                                duration: 2,
+                                repeat: Infinity,
+                                repeatType: "reverse" as const,
+                                ease: "easeInOut"
+                              }
+                            }
+                          };
 
   return (
-    <div className="relative h-64 w-64 perspective-1000">
+    <div className="relative h-64 w-64">
       <motion.div
-        initial={{ rotateX: 0 }}
-        animate={isShaking ? shakeAnimation : floatAnimation}
-        className="relative z-10 preserve-3d"
+        initial={{ y: 0, rotateY: 0 }}
+        animate={currentAnimation}
+        onAnimationComplete={handleRotationComplete}
+        className="relative z-10"
+        style={{ transformStyle: 'preserve-3d' }}
       >
-        <div className="w-64 h-64 rounded-full bg-black relative overflow-hidden shadow-2xl preserve-3d">
+        <div className="w-64 h-64 rounded-full bg-black relative shadow-2xl" 
+             style={{ transformStyle: 'preserve-3d' }}>
           {/* Glossy effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-transparent opacity-50" />
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 to-transparent opacity-30" />
           
-          {/* Initial "8" display */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center backface-hidden"
-            style={{ rotateX: 180 }}
+          {/* Front face with "8" */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ transform: 'rotateY(0deg) translateZ(2px)', backfaceVisibility: 'hidden' }}
           >
-            <span className="text-white text-4xl font-bold">8</span>
-          </motion.div>
+            <span className="text-white text-6xl font-bold">8</span>
+          </div>
 
-          {/* Answer window (on the other side) */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center backface-hidden"
+          {/* Back face with answer */}
+          <div 
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ transform: 'rotateY(180deg) translateZ(2px)', backfaceVisibility: 'hidden' }}
           >
-            <motion.p
-              key={answer}
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.5 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="text-white text-sm text-center px-2 font-medium"
-            >
-              {answer}
-            </motion.p>
-          </motion.div>
+            <div className="w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center overflow-hidden">
+              <AnimatePresence mode="wait">
+                {answer && (
+                  <motion.p
+                    key={answer}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="text-white text-sm text-center px-2 font-medium"
+                  >
+                    {answer}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </motion.div>
 

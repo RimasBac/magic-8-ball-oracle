@@ -12,8 +12,8 @@ export const ThemedMagic8Ball: React.FC = () => {
     setIsShaking(true);
     setAnswer(null);
 
-    // Longer shake for first question to allow for rotation
-    await new Promise(resolve => setTimeout(resolve, isFirstQuestion ? 1500 : 1000));
+    // Wait for shake animation
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     const answers = [
       "It is certain",
@@ -37,7 +37,10 @@ export const ThemedMagic8Ball: React.FC = () => {
     
     setIsShaking(false);
     setAnswer(randomAnswer);
-    setIsFirstQuestion(false);
+
+    if (isFirstQuestion) {
+      setIsFirstQuestion(false);
+    }
   };
 
   return (
@@ -48,6 +51,7 @@ export const ThemedMagic8Ball: React.FC = () => {
             e.preventDefault();
             const question = (e.target as HTMLFormElement).question.value;
             handleAsk(question);
+            (e.target as HTMLFormElement).reset();
           }}
           className="w-full"
         >
