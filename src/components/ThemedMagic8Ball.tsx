@@ -4,6 +4,7 @@ import { AnimatedMagic8Ball } from './AnimatedMagic8Ball';
 export const ThemedMagic8Ball: React.FC = () => {
   const [answer, setAnswer] = useState<string | null>(null);
   const [isShaking, setIsShaking] = useState(false);
+  const [isFirstQuestion, setIsFirstQuestion] = useState(true);
 
   const handleAsk = async (question: string) => {
     if (!question.trim()) return;
@@ -11,7 +12,8 @@ export const ThemedMagic8Ball: React.FC = () => {
     setIsShaking(true);
     setAnswer(null);
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Longer shake for first question to allow for rotation
+    await new Promise(resolve => setTimeout(resolve, isFirstQuestion ? 1500 : 1000));
     
     const answers = [
       "It is certain",
@@ -35,6 +37,7 @@ export const ThemedMagic8Ball: React.FC = () => {
     
     setIsShaking(false);
     setAnswer(randomAnswer);
+    setIsFirstQuestion(false);
   };
 
   return (
@@ -61,6 +64,7 @@ export const ThemedMagic8Ball: React.FC = () => {
         <AnimatedMagic8Ball 
           isShaking={isShaking}
           answer={answer}
+          isFirstQuestion={isFirstQuestion}
         />
       </div>
     </div>
