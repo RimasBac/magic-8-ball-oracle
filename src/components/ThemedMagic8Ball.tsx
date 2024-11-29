@@ -11,7 +11,6 @@ export const ThemedMagic8Ball: React.FC = () => {
     setIsShaking(true);
     setAnswer(null);
 
-    // Simulate thinking time
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const answers = [
@@ -39,28 +38,31 @@ export const ThemedMagic8Ball: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4">
-      {/* Input */}
-      <form 
-        onSubmit={(e) => {
-          e.preventDefault();
-          const question = (e.target as HTMLFormElement).question.value;
-          handleAsk(question);
-        }}
-        className="mb-8 w-full max-w-md"
-      >
-        <input
-          type="text"
-          name="question"
-          placeholder="Ask your question..."
-          className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-      </form>
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gray-900 flex flex-col items-center justify-center">
+      <div className="relative w-full max-w-md px-4 mb-8">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            const question = (e.target as HTMLFormElement).question.value;
+            handleAsk(question);
+          }}
+          className="w-full"
+        >
+          <input
+            type="text"
+            name="question"
+            placeholder="Ask your question..."
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+        </form>
+      </div>
 
-      <AnimatedMagic8Ball 
-        isShaking={isShaking}
-        answer={answer}
-      />
+      <div className="relative">
+        <AnimatedMagic8Ball 
+          isShaking={isShaking}
+          answer={answer}
+        />
+      </div>
     </div>
   );
 };
