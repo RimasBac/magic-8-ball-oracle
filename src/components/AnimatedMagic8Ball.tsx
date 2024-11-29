@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import SmokeEffect from './SmokeEffect';
 
 interface AnimatedMagic8BallProps {
   isShaking: boolean;
@@ -29,7 +30,7 @@ export const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShakin
         <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-transparent opacity-50" />
         
         {/* Answer window */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center overflow-hidden">
           <motion.p
             key={answer}
             initial={{ opacity: 0, scale: 0.5 }}
@@ -39,7 +40,13 @@ export const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShakin
             {answer}
           </motion.p>
         </div>
+
+        {/* Smoke Effect */}
+        <SmokeEffect isActive={!isShaking && answer !== null} />
       </div>
+
+      {/* Ambient glow */}
+      <div className="absolute inset-0 rounded-full bg-purple-500/10 blur-xl" />
     </motion.div>
   );
 };
