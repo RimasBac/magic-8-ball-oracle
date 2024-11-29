@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatedMagic8Ball } from './AnimatedMagic8Ball';
+import AnimatedMagic8Ball from './AnimatedMagic8Ball';
 
 export const ThemedMagic8Ball: React.FC = () => {
   const [answer, setAnswer] = useState<string | null>(null);

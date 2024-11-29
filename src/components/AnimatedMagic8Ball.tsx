@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
 import SmokeEffect from './SmokeEffect';
 
 interface AnimatedMagic8BallProps {
@@ -13,8 +13,8 @@ const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answ
   const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 
   // Calculate animation ranges based on screen size
-  const floatRange = Math.max(10, Math.min(viewportHeight * 0.02, 30)); // 2% of screen height, min 10px, max 30px
-  const shakeRange = Math.max(15, Math.min(viewportHeight * 0.03, 40)); // 3% of screen height, min 15px, max 40px
+  const floatRange = Math.max(10, Math.min(viewportHeight * 0.02, 30));
+  const shakeRange = Math.max(15, Math.min(viewportHeight * 0.03, 40));
 
   useEffect(() => {
     const handleResize = () => {
@@ -63,13 +63,13 @@ const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answ
   }, [isFirstQuestion]);
 
   return (
-    <div className="relative h-64 w-64">
+    <div className="relative h-64 w-64 perspective-1000">
       <motion.div
         initial={{ rotateX: 0 }}
         animate={isShaking ? shakeAnimation : floatAnimation}
-        className="relative z-10"
+        className="relative z-10 preserve-3d"
       >
-        <div className="w-64 h-64 rounded-full bg-black relative overflow-hidden shadow-2xl">
+        <div className="w-64 h-64 rounded-full bg-black relative overflow-hidden shadow-2xl preserve-3d">
           {/* Glossy effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-transparent opacity-50" />
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 to-transparent opacity-30" />
@@ -77,7 +77,7 @@ const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answ
           {/* Initial "8" display */}
           <motion.div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center"
+                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center backface-hidden"
             style={{ rotateX: 180 }}
           >
             <span className="text-white text-4xl font-bold">8</span>
@@ -86,7 +86,7 @@ const AnimatedMagic8Ball: React.FC<AnimatedMagic8BallProps> = ({ isShaking, answ
           {/* Answer window (on the other side) */}
           <motion.div
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center"
+                      w-24 h-24 rounded-full bg-purple-900 flex items-center justify-center backface-hidden"
           >
             <motion.p
               key={answer}
